@@ -1,0 +1,6 @@
+{
+    "typesByRegex":{
+        ".*InMs$":"Long"
+    }
+
+}

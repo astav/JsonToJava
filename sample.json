@@ -1,0 +1,244 @@
+{
+  "testRegexInMs" : "30",
+  "realMap" : {
+    "0" : { "foo" : 1 },
+    "1" : { "bar" : "foo" }
+  },
+  "inventory": [
+    {
+      "identifier": "dog1",
+      "icon": null,
+      "levelRange": {
+        "min": 1,
+        "max": 2
+      },
+      "completedBestId": null,
+      "rewards": {
+        "goods": {
+          "quantities": {
+          }
+        },
+        "additionalRewards": [
+          {
+            "templateId": "stars"
+          }
+        ]
+      },
+      "cost": {
+        "goods": {
+          "quantities": {
+            "trinkets": 1000
+          }
+        }
+      },
+      "discount": 0.15,
+      "recommended": false
+    },
+    {
+      "identifier": "dog2",
+      "icon": null,
+      "levelRange": {
+        "min": 1,
+        "max": 100
+      },
+      "completedBestId": null,
+      "rewards": {
+        "goods": {
+          "quantities": {
+          }
+        },
+        "additionalRewards": [
+          {
+            "templateId": "sun"
+          }
+        ]
+      },
+      "cost": {
+        "goods": {
+          "quantities": {
+            "trinkets": 1000
+          }
+        }
+      },
+      "discount": 0,
+      "recommended": false
+    },
+    {
+      "identifier": "gloves1",
+      "icon": null,
+      "levelRange": {
+        "min": 5,
+        "max": 100
+      },
+      "completedBestId": null,
+      "rewards": {
+        "goods": {
+          "quantities": {
+          }
+        },
+        "additionalRewards": [
+          {
+            "templateId": "moon"
+          }
+        ]
+      },
+      "cost": {
+        "goods": {
+          "quantities": {
+          }
+        },
+        "currency": 1000
+      },
+      "discount": 0,
+      "recommended": false
+    },
+    {
+      "identifier": "boots1",
+      "icon": null,
+      "levelRange": {
+        "min": 5,
+        "max": 5
+      },
+      "completedBestId": null,
+      "rewards": {
+        "goods": {
+          "quantities": {
+          }
+        },
+        "additionalRewards": [
+          {
+            "templateId": "zombie"
+          }
+        ]
+      },
+      "cost": {
+        "goods": {
+          "quantities": {
+          }
+        },
+        "currency": 1000
+      },
+      "discount": 0,
+      "recommended": false
+    },
+    {
+      "identifier": "lotion5",
+      "icon": null,
+      "levelRange": {
+        "min": 1,
+        "max": 100
+      },
+      "completedBestId": null,
+      "rewards": {
+        "goods": {
+          "quantities": {
+            "karma": 5
+          }
+        },
+        "additionalRewards": [
+
+        ]
+      },
+      "cost": {
+        "goods": {
+          "quantities": {
+          }
+        },
+        "currency": 25
+      },
+      "discount": 0,
+      "recommended": true
+    },
+    {
+      "identifier": "crate1",
+      "icon": null,
+      "levelRange": {
+        "min": 10,
+        "max": 10
+      },
+      "completedBestId": null,
+      "rewards": {
+        "goods": {
+          "quantities": {
+            "crate_01": 1
+          }
+        },
+        "additionalRewards": [
+
+        ]
+      },
+      "cost": {
+        "goods": {
+          "quantities": {
+            "trinkets": 10
+          }
+        }
+      },
+      "discount": 0,
+      "recommended": false
+    },
+    {
+      "identifier": "mage1",
+      "icon": null,
+      "levelRange": {
+        "min": 1,
+        "max": 90
+      },
+      "completedBestId": null,
+      "rewards": {
+        "goods": {
+          "quantities": {
+            "coils": 1
+          }
+        },
+        "additionalRewards": [
+
+        ]
+      },
+      "cost": {
+        "goods": {
+          "quantities": {
+            "trinkets": 20
+          }
+        }
+      },
+      "discount": 0,
+      "recommended": false
+    },
+    {
+      "identifier": "bugs1",
+      "icon": null,
+      "levelRange": {
+        "min": 1,
+        "max": 100
+      },
+      "completedBestId": null,
+      "rewards": {
+        "goods": {
+          "quantities": {
+            "doors": 1
+          }
+        },
+        "additionalRewards": [
+
+        ]
+      },
+      "cost": {
+        "goods": {
+          "quantities": {
+            "trinkets": 30
+          }
+        }
+      },
+      "discount": 0,
+      "recommended": false
+    }
+  ],
+  "test" : {
+      "thisRange": {
+        "min": 1,
+        "max": 2
+      },
+      "messageOfTheDay": "Howdy Pardner! Check out our daily specials!"
+  }
+}
