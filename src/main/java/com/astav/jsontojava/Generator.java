@@ -170,7 +170,9 @@ public class Generator {
                     }
                 }
             } else {
-                vcMetaData.setVariableType(String.format(MAP_TYPE_GENERIC, MAP_DEFAULT_KEY_TYPE, DEFAULT_TYPE));
+                String defaultType = String.format(MAP_TYPE_GENERIC, MAP_DEFAULT_KEY_TYPE, DEFAULT_TYPE);
+                printWarnDefaultType(entryKey, defaultType);
+                vcMetaData.setVariableType(defaultType);
                 vcMetaData.setVariableName(entryKey);
             }
         } else if (List.class.isAssignableFrom(aClass)) { // list type match
@@ -195,15 +197,21 @@ public class Generator {
                     vcMetaData.setGenerateClass(listEntryMetaData.getGenerateClass());
                 }
             } else {
-                vcMetaData.setVariableType(String.format(LIST_TYPE_GENERIC, DEFAULT_TYPE));
+                String defaultType = String.format(LIST_TYPE_GENERIC, DEFAULT_TYPE);
+                printWarnDefaultType(entryKey, defaultType);
+                vcMetaData.setVariableType(defaultType);
                 vcMetaData.setVariableName(entryKey);
             }
         } else {
-            System.out.println(String.format(" *Warning*: Chosen type 'Object' for json field '%s' with null value", entryKey));
+            printWarnDefaultType(entryKey, DEFAULT_TYPE);
             vcMetaData.setVariableType(DEFAULT_TYPE);
             vcMetaData.setVariableName(entryKey);
         }
         return vcMetaData;
+    }
+
+    private void printWarnDefaultType(String entryKey, String defaultType) {
+        System.out.println(String.format(" *Warning*: Chosen type '%s' for json field '%s' with null value", defaultType, entryKey));
     }
 
     private int askUserToPickOneIfMultipleClasses(String entryKey, List<Class<?>> matchingClasses) throws IOException {
