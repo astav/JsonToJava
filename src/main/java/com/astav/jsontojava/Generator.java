@@ -156,7 +156,7 @@ public class Generator {
 
                         String entryName = entryKey + ENTRY_POSTFIX_NAME;
                         vcMetaData.setVariableType(String.format(MAP_TYPE_GENERIC, MAP_DEFAULT_KEY_TYPE, StringHelper.capFirstLetter(entryName)));
-                        vcMetaData.setVariableName(entryName);
+                        vcMetaData.setVariableName(entryKey);
 
                         vcMetaData.setGenerateClass(Optional.of(new GenerateClassForMap(entryName, allEntryMap)));
                     } else {
@@ -184,7 +184,7 @@ public class Generator {
 
                     String entryName = entryKey + ENTRY_POSTFIX_NAME;
                     vcMetaData.setVariableType(String.format(LIST_TYPE_GENERIC, StringHelper.capFirstLetter(entryName)));
-                    vcMetaData.setVariableName(entryName);
+                    vcMetaData.setVariableName(entryKey);
 
                     vcMetaData.setGenerateClass(Optional.of(new GenerateClassForMap(entryName, allEntryMap)));
 
