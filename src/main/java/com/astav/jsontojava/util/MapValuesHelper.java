@@ -11,7 +11,7 @@ import java.util.Map;
  * User: Astav
  * Date: 10/21/12
  */
-public class PrimitiveClassHelper {
+public class MapValuesHelper {
     @SuppressWarnings("unchecked")
     private static List<Class<?>> primitiveTypeClasses = new ArrayList<Class<?>>(
             Arrays.asList(Boolean.class, Double.class, Integer.class, Long.class, String.class));
@@ -65,10 +65,11 @@ public class PrimitiveClassHelper {
         return Optional.absent();
     }
 
-    public Optional<Class<?>> getValuePrimitiveClassIfPossible(Map mapValue) {
+    public Optional<Class<?>> areAllValuesTheSamePrimitiveType(Map mapValue) {
         Class<?> valuePrimitiveClass = null;
         for (Object aValue : mapValue.values()) {
             if (aValue == null) {
+                // TODO: Print warning of null value
                 return Optional.absent();
             }
             Optional<Class> thisPrimitiveClass = getPrimitiveClass(aValue.getClass(), aValue);
@@ -80,5 +81,18 @@ public class PrimitiveClassHelper {
             }
         }
         return Optional.<Class<?>>of(valuePrimitiveClass);
+    }
+
+    public boolean areAllValuesComplexTypes(Map mapValue) {
+        for (Object aValue : mapValue.values()) {
+            if (aValue == null) {
+                // TODO: Print warning of null value
+                return false;
+            }
+            if (!Map.class.isAssignableFrom(aValue.getClass())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

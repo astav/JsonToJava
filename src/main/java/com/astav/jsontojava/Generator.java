@@ -5,7 +5,7 @@ import com.astav.jsontojava.classmanager.ImportClassManager;
 import com.astav.jsontojava.regex.RegexFilter;
 import com.astav.jsontojava.template.JavaTemplate;
 import com.astav.jsontojava.util.MergeMapCollectionHelper;
-import com.astav.jsontojava.util.PrimitiveClassHelper;
+import com.astav.jsontojava.util.MapValuesHelper;
 import com.astav.jsontojava.util.StringHelper;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -34,20 +34,22 @@ public class Generator {
     private final String outputDirectory;
     private final ClassFiles classFiles = new ClassFiles();
     private final MergeMapCollectionHelper mergeMapCollectionHelper = new MergeMapCollectionHelper();
-    private final PrimitiveClassHelper primitiveClassHelper = new PrimitiveClassHelper();
+    private final MapValuesHelper mapValuesHelper = new MapValuesHelper();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final JavaTemplate javaTemplate = new JavaTemplate();
     private final GeneratedClassManager generatedClassManager;
     private final Optional<ImportClassManager> importClassManager;
     private final Optional<RegexFilter> regexFilter;
+    private final boolean promptForComplexValueTypes;
     private int generatedFileCount = 0;
 
-    public Generator(String outputDirectory, String packageName, String regexFilename, String importDirectory, List<String> importPackages) throws IOException, ClassNotFoundException {
+    public Generator(String outputDirectory, String packageName, String regexFilename, String importDirectory, List<String> importPackages, boolean promptForComplexValueTypes) throws IOException, ClassNotFoundException {
         this.packageName = packageName;
         System.out.println("Package name is '" + this.packageName + "'");
         this.outputDirectory = outputDirectory;
         System.out.println("Output directory is '" + this.outputDirectory + "'");
         this.generatedClassManager = new GeneratedClassManager(outputDirectory, packageName);
+        this.promptForComplexValueTypes = promptForComplexValueTypes;
         File regexFile = new File(regexFilename);
         if (regexFile.exists()) {
             System.out.println(String.format("Using regex file '%s'", regexFilename));
@@ -104,7 +106,7 @@ public class Generator {
             return vcMetaData;
         }
 
-        Optional<Class> isAPrimitiveClass = primitiveClassHelper.getPrimitiveClass(aClass, value);
+        Optional<Class> isAPrimitiveClass = mapValuesHelper.getPrimitiveClass(aClass, value);
         if (isAPrimitiveClass.isPresent()) { // primitive class match
             Class<?> primitiveClass = isAPrimitiveClass.get();
             vcMetaData.setVariableType(StringHelper.capFirstLetter(primitiveClass.getSimpleName()));
@@ -135,15 +137,28 @@ public class Generator {
             boolean stayAsMap = false;
             Map mapValue = (Map) value;
             if (!mapValue.isEmpty()) {
-                Optional<Class<?>> valuesPrimitiveType = primitiveClassHelper.getValuePrimitiveClassIfPossible(mapValue);
+                Optional<Class<?>> valuesPrimitiveType = mapValuesHelper.areAllValuesTheSamePrimitiveType(mapValue);
 
                 Object aKey = mapValue.keySet().iterator().next();
-                Optional<Class> mapKeyPrimitiveClass = primitiveClassHelper.getPrimitiveClass(aKey.getClass(), aKey);
+                Optional<Class> mapKeyPrimitiveClass = mapValuesHelper.getPrimitiveClass(aKey.getClass(), aKey);
                 boolean mapKeyIsANumber = Number.class.isAssignableFrom(mapKeyPrimitiveClass.get());
                 if (mapKeyIsANumber) { // if the key is a number stay as a map
                     stayAsMap = true;
-                } else if (valuesPrimitiveType.isPresent()) {
-                    stayAsMap = !askUserIfNewClassIsRequired(entryKey, mapValue, valuesPrimitiveType.get());
+                } else if (valuesPrimitiveType.isPresent()) { // if all values are the same primitive type
+                    stayAsMap = !askUserIfNewClassIsRequired(
+                            entryKey,
+                            mapValue,
+                            valuesPrimitiveType.get().getSimpleName(),
+                            String.format("called '%s'", StringHelper.capFirstLetter(entryKey)),
+                            true);
+                } else if(promptForComplexValueTypes
+                        && mapValuesHelper.areAllValuesComplexTypes(mapValue)) { // if all values are complex types (assignable to a map)
+                    stayAsMap = !askUserIfNewClassIsRequired(
+                            entryKey,
+                            mapValue,
+                            StringHelper.capFirstLetter(getEntryKeyWithPostfix(entryKey)),
+                            "for every key in the map",
+                            false);
                 }
 
                 if (!stayAsMap) {
@@ -154,7 +169,7 @@ public class Generator {
                     if (!valuesPrimitiveType.isPresent()) {
                         @SuppressWarnings("unchecked") Map<String, Object> allEntryMap = mergeMapCollectionHelper.merge(mapValue.values());
 
-                        String entryName = entryKey + ENTRY_POSTFIX_NAME;
+                        String entryName = getEntryKeyWithPostfix(entryKey);
                         vcMetaData.setVariableType(String.format(MAP_TYPE_GENERIC, MAP_DEFAULT_KEY_TYPE, StringHelper.capFirstLetter(entryName)));
                         vcMetaData.setVariableName(entryKey);
 
@@ -184,7 +199,7 @@ public class Generator {
                     @SuppressWarnings("unchecked") List<Map<String, Object>> collectionMap = (List<Map<String, Object>>) listValue;
                     Map<String, Object> allEntryMap = mergeMapCollectionHelper.merge(collectionMap);
 
-                    String entryName = entryKey + ENTRY_POSTFIX_NAME;
+                    String entryName = getEntryKeyWithPostfix(entryKey);
                     vcMetaData.setVariableType(String.format(LIST_TYPE_GENERIC, StringHelper.capFirstLetter(entryName)));
                     vcMetaData.setVariableName(entryKey);
 
@@ -208,6 +223,10 @@ public class Generator {
             vcMetaData.setVariableName(entryKey);
         }
         return vcMetaData;
+    }
+
+    private String getEntryKeyWithPostfix(String entryKey) {
+        return entryKey + ENTRY_POSTFIX_NAME;
     }
 
     private void printWarnDefaultType(String entryKey, String defaultType) {
@@ -249,20 +268,21 @@ public class Generator {
         return useIndex;
     }
 
-    private boolean askUserIfNewClassIsRequired(String entryKey, Map mapValue, Class<?> primitiveClass) throws IOException {
+    private boolean askUserIfNewClassIsRequired(String entryKey, Map mapValue, String forMapValue, String secondOption, boolean defaultIsMap) throws IOException {
         System.out.println();
+        int defaultEntryIndex = defaultIsMap ? 1 : 2;
         System.out.println(String.format("What would you like to use for json field '%s'\n%s\n...", entryKey, objectMapper.writeValueAsString(mapValue)));
-        System.out.println(String.format(" 1. Use a 'Map<String, %s>' (default)", primitiveClass.getSimpleName()));
-        System.out.println(String.format(" 2. Generate a new class called '%s'", StringHelper.capFirstLetter(entryKey)));
+        System.out.println(String.format(" 1. Use a 'Map<String, %s>'", forMapValue));
+        System.out.println(String.format(" 2. Generate a new class %s", secondOption));
         Integer valueChosen = null;
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (valueChosen == null
                 || (valueChosen != 1
                 && valueChosen != 2)) {
-            System.out.print(String.format("Pick a class for json field '%s' [default: 1]: ", entryKey));
+            System.out.print(String.format("Pick a class for json field '%s' [default: %s]: ", entryKey, defaultEntryIndex));
             String inputStr = br.readLine();
             if (inputStr.isEmpty()) {
-                valueChosen = 1;
+                valueChosen = defaultEntryIndex;
             } else {
                 valueChosen = Integer.valueOf(inputStr);
             }
