@@ -45,7 +45,7 @@ public class JsonToJava {
             return;
         }
         String importBaseDir = args.length > 6 ? args[6] : null;
-        List<String> importPackageNames = args.length > 7 ? Lists.newArrayList(args).subList(6, args.length) : null;
+        List<String> importPackageNames = args.length > 7 ? Lists.newArrayList(args).subList(7, args.length) : null;
         @SuppressWarnings("unchecked") Map<String, Object> map = mapper.readValue(FileUtils.readFileToString(new File(args[0])), Map.class);
         Generator generator = new Generator(args[1], args[2], args[4], importBaseDir, importPackageNames, args[5].equals("true"));
         System.out.println("Generating classes....");
